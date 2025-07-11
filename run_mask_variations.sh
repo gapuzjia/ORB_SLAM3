@@ -1,78 +1,50 @@
 #!/bin/bash
+set -e
 
-# Get the current date for creating unique result directories and log files
-DATE=$(date +"%Y-%m-%d_%H-%M-%S")
+MASK_DIR="./src/Masks"
+RESULTS_DIR="./Results"
+DATASET_DIR="./Datasets/EuRoc/MH_01_easy"
 
-# Function to execute ORBSLAM3 and save results
-run_orbslam() {
-  local config_file=$1
-  local result_folder_prefix=$2
-  local dataset=$3
-  local run_number=$4
-  local mask_size=$5
-  local log_file="cout_${result_folder_prefix}_${dataset}_${mask_size}_${run_number}_${DATE}.log"
+for MASK_PATH in "$MASK_DIR"/*.cc; do
+    MASK_FILE=$(basename "$MASK_PATH")
+    MASK_NAME="${MASK_FILE%.*}"  # Remove extension
+    OUTPUT_DIR="${RESULTS_DIR}/${MASK_NAME}"
 
-  # echo "Starting ORBSLAM3 run #${run_number} on dataset ${dataset} with configuration: $config_file"
-  local dataset_with_underscore=$(echo $dataset | sed 's/\([A-Z]*\)\([0-9]*\)/\1_\2/')
-  local command="./Examples/Stereo-Inertial/stereo_inertial_euroc ./Vocabulary/ORBvoc.txt $config_file ./Datasets/EuRoc/${dataset_with_underscore}* ./Examples/Stereo-Inertial/EuRoC_TimeStamps/${dataset}.txt dataset-${dataset}_stereo_imu"
-  echo "Running command: $command"
-  $command > $log_file
+    echo "============================="
+    echo "[INFO] Running with: $MASK_NAME"
+    echo "============================="
 
-  echo "Saving results..."
-  local result_folder="${DATE}_${result_folder_prefix}_${dataset}_${mask_size}_run_${run_number}"
-  mkdir -p $result_folder
-  mv LocalMapTimeStats.txt ExecMean.txt LBA_Stats.txt TrackingTimeStats.txt  SessionInfo.txt  $log_file $result_folder
+    # Replace CellManager.cc
+    cp "$MASK_PATH" ./src/CellManager.cc
 
-  # Move map_points.csv if it exists
-  if [ -f map_points.csv ]; then
-    mv map_points.csv $result_folder
-  fi
-  
-  # Move f_dataset-${dataset}_stereo_imu.txt if it exists
-  if [ -f "f_dataset-${dataset}_stereo_imu.txt" ]; then
-    mv "f_dataset-${dataset}_stereo_imu.txt" "$result_folder"
-  fi
+    # Rebuild
+    echo "[INFO] Building $MASK_NAME..."
+    rm -rf build
+    mkdir build
+    cd build
+    cmake ..
+    make -j$(nproc)
+    cd ..
 
-  # Move kf_dataset-${dataset}_stereo_imu.txt if it exists
-  if [ -f "kf_dataset-${dataset}_stereo_imu.txt" ]; then
-    mv "kf_dataset-${dataset}_stereo_imu.txt" "$result_folder"
-  fi
+    # Create results folder
+    mkdir -p "$OUTPUT_DIR"
 
-  # Move map_points.csv if it exists
-  if [ -f cellManager.txt ]; then
-    mv cellManager.txt $result_folder
-  fi
+    # Run ORB-SLAM3
+    echo "[INFO] Running SLAM with $MASK_NAME..."
+    ./Examples/Stereo-Inertial/stereo_inertial_euroc \
+        ./Vocabulary/ORBvoc.txt \
+        ./Examples/Stereo-Inertial/EuRoC_oasis.yaml \
+        "$DATASET_DIR" \
+        ./Examples/Stereo-Inertial/EuRoC_TimeStamps/MH01.txt \
+        > "${OUTPUT_DIR}/log.txt" 2>&1
 
-  echo "Results saved in $result_folder"
-}
+    # Move output files
+    [ -f CameraTrajectory.txt ] && mv CameraTrajectory.txt "${OUTPUT_DIR}/"
+    [ -f KeyFrameTrajectory.txt ] && mv KeyFrameTrajectory.txt "${OUTPUT_DIR}/"
+    [ -f cellManager.txt ] && mv cellManager.txt "${OUTPUT_DIR}/"
 
-# Number of runs for each configuration
-NUM_RUNS=1
-
-# Datasets to process
-DATASETS=("MH01" "MH02" "MH03" "MH04" "MH05")
-
-# Base configuration file
-BASE_CONFIG="./Examples/Stereo-Inertial/EuRoC_fov_deadlines.yaml"
-RESULT_FOLDER_PREFIX="result_stereo_inertial_fov_deadlines"
-
-# Loop through different mask sizes and create corresponding configurations
-for ((mask_size=2; mask_size<=12; mask_size++)); do
-  CONFIG_FILE="./Examples/Stereo-Inertial/EuRoC_fov_deadlines_mask_${mask_size}x${mask_size}.yaml"
-  cp $BASE_CONFIG $CONFIG_FILE
-
-  # Update the maskHeight and maskWidth values in the copied YAML file
-  sed -i "s/^System.maskHeight: [0-9]*/System.maskHeight: ${mask_size}/" $CONFIG_FILE
-  sed -i "s/^System.maskWidth: [0-9]*/System.maskWidth: ${mask_size}/" $CONFIG_FILE
-
-  # Randomize dataset and configuration selection
-  for ((i=1; i<=NUM_RUNS; i++)); do
-    for dataset in "${DATASETS[@]}"; do
-      run_orbslam $CONFIG_FILE $RESULT_FOLDER_PREFIX $dataset $i $mask_size
-    done | shuf
-  done | shuf
-
-  # Remove the temporary configuration file after use
-  rm $CONFIG_FILE
-
+    echo "[DONE] Results saved to $OUTPUT_DIR"
 done
+
+echo "All masks finished!"
+

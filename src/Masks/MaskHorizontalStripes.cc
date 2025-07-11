@@ -1,5 +1,6 @@
 
 
+
 #include "CellManager.h"
 
 #include <iostream>
@@ -41,7 +42,7 @@ bool CellManager::skipCell(const feature_extraction_state_t& cell)
         const int center_col = cell.nCols/2;
 	
 	//-----THIS IS MASKING LOGIC
-	if ((cell.col % 2) != 0) skip = true;	 	
+	if ((cell.row % 2) != 0) skip = true;	
 	//-----MASKING LOGIC END HERE
 
         // check if we're skipping this cell, based on the number of frames we need to skip
@@ -200,7 +201,7 @@ double CellManager::getAverageCellsPerFrame() const
 void CellManager::printStats(const double& frame_num, const double& frameTimestamp) const
 {
     // Open file in append mode
-    std::ofstream file("VerticalStripes.txt", std::ios::app);
+    std::ofstream file("HorizontalStripes.txt", std::ios::app);
     if (!file) {
         // Handle file open error
         std::cerr << "Failed to open cellManager.txt" << std::endl;
