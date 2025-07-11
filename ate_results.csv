@@ -1,0 +1,7 @@
+Folder,Dataset,Mask,ATE (m),Runtime (ms)
+2025-07-11_09-59-23_result_oasis_MH01_MaskVerticalStripes_run1,MH01,VerticalStripes_run1,,10447
+2025-07-11_09-59-23_result_oasis_MH01_MaskVerticalStripes_run2,MH01,VerticalStripes_run2,,7433
+2025-07-11_09-59-23_result_oasis_MH01_MaskVerticalStripes_run3,MH01,VerticalStripes_run3,,7453
+2025-07-11_10-15-10_result_deadlines_MH01_MaskHorizontalStripes_run1,MH01,HorizontalStripes_run1,,7688
+2025-07-11_10-15-10_result_deadlines_MH02_MaskHorizontalStripes_run1,MH02,HorizontalStripes_run1,,5161
+2025-07-11_10-15-10_result_fov_deadlines_MH01_MaskHorizontalStripes_run1,MH01,HorizontalStripes_run1,,7676
