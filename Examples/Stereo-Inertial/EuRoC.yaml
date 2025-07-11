@@ -112,3 +112,8 @@ Viewer.ViewpointZ: -1.8
 Viewer.ViewpointF: 500.0
 Viewer.imageViewScale: 1.0
 
+System:
+  enableOasis: true
+  maskHeight: 4
+  maskWidth: 4
+Viewer.Active: 0
