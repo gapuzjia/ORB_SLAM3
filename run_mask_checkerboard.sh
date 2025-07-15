@@ -1,6 +1,3 @@
-
-
-
 #!/bin/bash
 set -e  # Exit on error
 
@@ -8,7 +5,8 @@ MASK_NAME="MaskCheckerboard"
 DATE=$(date +"%Y-%m-%d_%H-%M-%S")
 NUM_RUNS=1
 
-DATASETS=("MH01" "MH02" "MH03")
+
+DATASETS=("MH03" "MH04" "MH05" "V101" "V102" "V103" "V201" "V202" "V203")
 
 CONFIGURATIONS=(
   "./Examples/Stereo-Inertial/EuRoC_oasis.yaml result_oasis"
