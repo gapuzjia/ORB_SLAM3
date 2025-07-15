@@ -16,14 +16,9 @@ CONFIGURATIONS=(
   "./Examples/Stereo-Inertial/EuRoC.yaml result_normal"
 )
 
-# === STEP 1: Replace CellManager and Rebuild ===
-echo "[INFO] Rebuilding ORB-SLAM3 with $MASK_NAME..."
-cp ./src/Masks/${MASK_NAME}.cc ./src/CellManager.cc
-rm -rf build && mkdir build && cd build
-cmake .. && make -j$(nproc)
-cd ..
+EXE="./Examples/Stereo-Inertial/stereo_inertial_euroc_${MASK_NAME}"
 
-# === STEP 2: Run all configs, datasets, and repetitions ===
+#run all configs, datasets, and repetitions
 run_orbslam() {
   local config_file=$1
   local result_folder_prefix=$2
@@ -64,7 +59,7 @@ run_orbslam() {
   echo "[SAVED] → $result_folder"
 }
 
-# === Execute all runs ===
+#execute all runs
 for config_pair in "${CONFIGURATIONS[@]}"; do
   IFS=' ' read -r CONFIG_FILE RESULT_PREFIX <<< "$config_pair"
   for dataset in "${DATASETS[@]}"; do

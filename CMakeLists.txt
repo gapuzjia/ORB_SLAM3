@@ -778,3 +778,25 @@ if(realsense2_FOUND)
             Examples_old/Stereo-Inertial/stereo_inertial_realsense_D435i.cc)
     target_link_libraries(stereo_inertial_realsense_D435i_old ${PROJECT_NAME})
 endif()
+
+#Build for masking strategies
+set(MASKS
+    MaskCheckerboard
+    MaskHorizontalStripes
+    MaskVerticalStripes
+    MaskRandom
+)
+
+foreach(MASK ${MASKS})
+    set(MASK_SRC ${PROJECT_SOURCE_DIR}/src/Masks/${MASK}.cc)
+    add_executable(stereo_inertial_euroc_${MASK}
+        Examples/Stereo-Inertial/stereo_inertial_euroc.cc
+        ${MASK_SRC}
+    )
+    target_include_directories(stereo_inertial_euroc_${MASK} PRIVATE
+        ${PROJECT_SOURCE_DIR}/include
+        ${PROJECT_SOURCE_DIR}/include/CameraModels
+    )
+    target_link_libraries(stereo_inertial_euroc_${MASK} ${PROJECT_NAME})
+endforeach()
+
