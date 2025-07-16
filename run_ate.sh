@@ -5,6 +5,7 @@ output_file="ATE_results.csv"
 echo "Folder,ATE_RMSE_m,Runtime_ms" > "$output_file"
 
 # Ground truth files
+# ----FIX HARDCODED VALUES
 gt_mh01="./MH01data.csv"
 gt_mh02="./MH02data.csv"
 
@@ -41,13 +42,16 @@ for folder in 2025-*; do
         continue
     fi
 
-    # Run ATE evaluation
+    # Run ATE evaluation-----------------
     echo "Running ATE on $f_file ..."
     start=$(date +%s%3N)
     ATE_OUTPUT=$(python3 evaluation/evaluate_ate_scale.py "$gt_file" "$f_file")
     end=$(date +%s%3N)
     runtime=$((end - start))
+	
 
+
+    #ADD POSE ERROR EVAL HERE------------
     # Parse RMSE value (first CSV field from script output)
     rmse=$(echo "$ATE_OUTPUT" | cut -d',' -f1)
 
