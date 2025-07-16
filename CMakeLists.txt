@@ -791,8 +791,10 @@ foreach(MASK ${MASKS})
     set(MASK_SRC ${PROJECT_SOURCE_DIR}/src/Masks/${MASK}.cc)
     add_executable(stereo_inertial_euroc_${MASK}
         Examples/Stereo-Inertial/stereo_inertial_euroc.cc
+	#this overrides default CellManager.cc
         ${MASK_SRC}
     )
+    #explicitly direct where to find header files
     target_include_directories(stereo_inertial_euroc_${MASK} PRIVATE
         ${PROJECT_SOURCE_DIR}/include
         ${PROJECT_SOURCE_DIR}/include/CameraModels

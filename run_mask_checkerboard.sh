@@ -6,7 +6,7 @@ DATE=$(date +"%Y-%m-%d_%H-%M-%S")
 NUM_RUNS=1
 
 
-DATASETS=("MH03" "MH04" "MH05" "V101" "V102" "V103" "V201" "V202" "V203")
+DATASETS=("MH01" "MH02" "MH03" "MH04" "MH05" "V101" "V102" "V103" "V201" "V202" "V203")
 
 CONFIGURATIONS=(
   "./Examples/Stereo-Inertial/EuRoC_oasis.yaml result_oasis"
@@ -48,7 +48,7 @@ run_orbslam() {
   mkdir -p "$result_folder"
   mv "$log_file" "$result_folder"
 
-  # Wait a second to let I/O finish before moving
+  #let I/O finish before moving
   sleep 1
   for file in LocalMapTimeStats.txt ExecMean.txt LBA_Stats.txt TrackingTimeStats.txt SessionInfo.txt \
               map_points.csv "f_dataset-${dataset}_stereo_imu.txt" \

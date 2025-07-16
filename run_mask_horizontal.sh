@@ -1,5 +1,3 @@
-
-
 #!/bin/bash
 set -e  # Exit on error
 
@@ -7,7 +5,7 @@ MASK_NAME="MaskHorizontalStripes"
 DATE=$(date +"%Y-%m-%d_%H-%M-%S")
 NUM_RUNS=1
 
-DATASETS=("MH03" "MH04" "MH05" "V101" "V102" "V103" "V201" "V202" "V203")
+DATASETS=("MH01" "MH02" "MH03" "MH04" "MH05" "V101" "V102" "V103" "V201" "V202" "V203")
 
 CONFIGURATIONS=(
   "./Examples/Stereo-Inertial/EuRoC_oasis.yaml result_oasis"
@@ -19,7 +17,7 @@ CONFIGURATIONS=(
 
 EXE="./Examples/Stereo-Inertial/stereo_inertial_euroc_${MASK_NAME}"
 
-# === STEP 2: Run all configs, datasets, and repetitions ===
+#run all configs
 run_orbslam() {
   local config_file=$1
   local result_folder_prefix=$2
@@ -49,7 +47,7 @@ run_orbslam() {
   mkdir -p "$result_folder"
   mv "$log_file" "$result_folder"
 
-  # Wait a second to let I/O finish before moving
+  #let I/O finish before moving
   sleep 1
   for file in LocalMapTimeStats.txt ExecMean.txt LBA_Stats.txt TrackingTimeStats.txt SessionInfo.txt \
               map_points.csv "f_dataset-${dataset}_stereo_imu.txt" \
@@ -60,7 +58,7 @@ run_orbslam() {
   echo "[SAVED] → $result_folder"
 }
 
-# === Execute all runs ===
+#execute all runs
 for config_pair in "${CONFIGURATIONS[@]}"; do
   IFS=' ' read -r CONFIG_FILE RESULT_PREFIX <<< "$config_pair"
   for dataset in "${DATASETS[@]}"; do
