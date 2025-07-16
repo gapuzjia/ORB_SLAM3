@@ -37,7 +37,7 @@ run_orbslam() {
   local log_file="cout_${result_folder_prefix}_${dataset}_${MASK_NAME}_run${run_number}_${DATE}.log"
   local result_folder="${DATE}_${result_folder_prefix}_${dataset}_${MASK_NAME}_run${run_number}"
 
-  echo "[RUNNING] $MASK_NAME | $dataset | $result_folder_prefix | Run $run_number"
+  echo "[RUNNING] $MASK_NAME | $dataset | $result_folder_prefix | Run $run_number" | tee -a "$log_file"
   ./Examples/Stereo-Inertial/stereo_inertial_euroc \
     ./Vocabulary/ORBvoc.txt $config_file \
     ./Datasets/EuRoc/${dataset_with_underscore}* \
