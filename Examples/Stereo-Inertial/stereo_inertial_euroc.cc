@@ -37,8 +37,7 @@ void LoadImages(const string &strPathLeft, const string &strPathRight, const str
                 vector<string> &vstrImageLeft, vector<string> &vstrImageRight, vector<double> &vTimeStamps);
 
 void LoadIMU(const string &strImuPath, vector<double> &vTimeStamps, vector<cv::Point3f> &vAcc, vector<cv::Point3f> &vGyro);
-
-void PrintRunHeader(int argc, char** argv) {
+void PrintRunHeader(int& argc, char** argv) {
     if (argc >= 9) {
         std::string mask_name     = argv[argc - 4];
         std::string dataset       = argv[argc - 3];
@@ -48,13 +47,16 @@ void PrintRunHeader(int argc, char** argv) {
         std::cout << "[RUNNING] " << mask_name << " | "
                   << dataset << " | " << result_prefix
                   << " | Run " << run_number << std::endl;
+
+        //strip out the 4 extra arguments so they don't confuse main()
+        argc -= 4;
     }
 }
 
 int main(int argc, char **argv)
 {
 	//print info aabout current run
-	PrintRunHeader(argc, argv);	
+	PrintRunHeader(argc, argv);
 
     if(argc < 5)
     {
