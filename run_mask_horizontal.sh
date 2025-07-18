@@ -36,13 +36,13 @@ run_orbslam() {
   local log_file="cout_${result_folder_prefix}_${dataset}_${MASK_NAME}_run${run_number}_${DATE}.log"
   local result_folder="${DATE}_${result_folder_prefix}_${dataset}_${MASK_NAME}_run${run_number}"
 
-  echo "[RUNNING] $MASK_NAME | $dataset | $result_folder_prefix | Run $run_number" | tee -a "$log_file"
-  ./Examples/Stereo-Inertial/stereo_inertial_euroc \
-    ./Vocabulary/ORBvoc.txt $config_file \
-    ./Datasets/EuRoc/${dataset_with_underscore}* \
-    ./Examples/Stereo-Inertial/EuRoC_TimeStamps/${dataset}.txt \
-    dataset-${dataset}_stereo_imu \
-    2>&1 | tee "$log_file"
+./Examples/Stereo-Inertial/stereo_inertial_euroc \
+	./Vocabulary/ORBvoc.txt $config_file \
+  	./Datasets/EuRoc/${dataset_with_underscore}* \
+  	./Examples/Stereo-Inertial/EuRoC_TimeStamps/${dataset}.txt \
+ 	dataset-${dataset}_stereo_imu \
+  	"$MASK_NAME" "$dataset" "$result_folder_prefix" "$run_number" \
+  	2>&1 | tee "$log_file"
 
   mkdir -p "$result_folder"
   mv "$log_file" "$result_folder"
