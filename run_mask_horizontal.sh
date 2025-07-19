@@ -1,3 +1,4 @@
+
 #!/bin/bash
 set -e  # Exit on error
 
@@ -15,39 +16,31 @@ CONFIGURATIONS=(
   "./Examples/Stereo-Inertial/EuRoC.yaml result_normal"
 )
 
-EXE="./Examples/Stereo-Inertial/stereo_inertial_euroc_${MASK_NAME}"
+EXE="./Examples/Stereo-Inertial/stereo_inertial_euroc"
 
-#run all configs
 run_orbslam() {
   local config_file=$1
   local result_folder_prefix=$2
   local dataset=$3
   local run_number=$4
 
-  local dataset_with_underscore
-  if [[ $dataset == MH* ]]; then
-    dataset_with_underscore="${dataset:0:2}_${dataset:2:2}"
-  elif [[ $dataset == V* ]]; then
-    dataset_with_underscore="V${dataset:1:1}_${dataset:2:2}"
-  else
-    dataset_with_underscore="$dataset"
-  fi
+  local dataset_with_underscore="$dataset"
 
   local log_file="cout_${result_folder_prefix}_${dataset}_${MASK_NAME}_run${run_number}_${DATE}.log"
   local result_folder="${DATE}_${result_folder_prefix}_${dataset}_${MASK_NAME}_run${run_number}"
 
-./Examples/Stereo-Inertial/stereo_inertial_euroc \
-	./Vocabulary/ORBvoc.txt $config_file \
-  	./Datasets/EuRoc/${dataset_with_underscore}* \
-  	./Examples/Stereo-Inertial/EuRoC_TimeStamps/${dataset}.txt \
- 	dataset-${dataset}_stereo_imu \
-  	"$MASK_NAME" "$dataset" "$result_folder_prefix" "$run_number" \
-  	2>&1 | tee "$log_file"
+
+  $EXE \
+    ./Vocabulary/ORBvoc.txt "$config_file" \
+    ./Datasets/EuRoc/${dataset_with_underscore} \
+    ./Examples/Stereo-Inertial/EuRoC_TimeStamps/${dataset}.txt \
+    dataset-${dataset}_stereo_imu \
+    "$MASK_NAME" "$dataset" "$result_folder_prefix" "$run_number" \
+    2>&1 | tee "$log_file"
 
   mkdir -p "$result_folder"
   mv "$log_file" "$result_folder"
 
-  #let I/O finish before moving
   sleep 1
   for file in LocalMapTimeStats.txt ExecMean.txt LBA_Stats.txt TrackingTimeStats.txt SessionInfo.txt \
               map_points.csv "f_dataset-${dataset}_stereo_imu.txt" \
@@ -58,7 +51,7 @@ run_orbslam() {
   echo "[SAVED] → $result_folder"
 }
 
-#execute all runs
+#run all combinations
 for config_pair in "${CONFIGURATIONS[@]}"; do
   IFS=' ' read -r CONFIG_FILE RESULT_PREFIX <<< "$config_pair"
   for dataset in "${DATASETS[@]}"; do
