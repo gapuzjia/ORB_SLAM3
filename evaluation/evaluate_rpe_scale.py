@@ -2,6 +2,8 @@ import numpy as np
 import argparse
 from scipy.spatial.transform import Rotation as R
 import matplotlib.pyplot as plt
+import os
+import csv
 
 def read_trajectory(file_path):
     trajectory = {}
@@ -21,16 +23,13 @@ def read_trajectory(file_path):
             trajectory[timestamp] = pose
     return trajectory
 
-def compute_rpe(gt_trajectory, est_trajectory, delta=1.0):
+def compute_rpe(gt_trajectory, est_trajectory):
     timestamps = sorted(set(gt_trajectory.keys()).intersection(est_trajectory.keys()))
     trans_errors = []
     rot_errors = []
 
     for i in range(len(timestamps) - 1):
         t1, t2 = timestamps[i], timestamps[i + 1]
-        if t2 not in gt_trajectory or t2 not in est_trajectory:
-            continue
-
         gt_rel = np.linalg.inv(gt_trajectory[t1]) @ gt_trajectory[t2]
         est_rel = np.linalg.inv(est_trajectory[t1]) @ est_trajectory[t2]
         error_mat = np.linalg.inv(gt_rel) @ est_rel
@@ -58,11 +57,30 @@ def plot_errors(trans_errors, rot_errors, output_path=None):
     else:
         plt.show()
 
+def write_rpe_metrics_to_csv(csv_path, run_id, dataset, mask, trans_errors, rot_errors):
+    rmse_trans = np.sqrt(np.mean(np.square(trans_errors)))
+    rmse_rot = np.sqrt(np.mean(np.square(rot_errors)))
+    file_exists = os.path.isfile(csv_path)
+    with open(csv_path, mode='a', newline='') as file:
+        writer = csv.writer(file)
+        if not file_exists:
+            writer.writerow(["run_id", "dataset", "mask", "trans_rmse", "rot_rmse"])
+        writer.writerow([run_id, dataset, mask, rmse_trans, rmse_rot])
+
+def parse_run_metadata(file_path):
+    filename = os.path.basename(file_path)
+    parts = filename.replace(".txt", "").split("-")
+    dataset = parts[1] if len(parts) > 1 else "unknown"
+    mask = parts[0].replace("kf_dataset", "").replace("f_dataset", "") or "unknown"
+    run_id = filename.replace(".txt", "")
+    return run_id, dataset, mask
+
 def main():
-    parser = argparse.ArgumentParser(description="Compute Relative Pose Error (RPE)")
+    parser = argparse.ArgumentParser(description="Compute Relative Pose Error (RPE) with RMSE")
     parser.add_argument("groundtruth_file", help="Ground truth trajectory file")
     parser.add_argument("estimated_file", help="Estimated trajectory file")
     parser.add_argument("--plot", help="Path to save error plot", default=None)
+    parser.add_argument("--csv", help="Path to save CSV summary", default=None)
     args = parser.parse_args()
 
     gt_traj = read_trajectory(args.groundtruth_file)
@@ -70,10 +88,20 @@ def main():
 
     trans_errors, rot_errors = compute_rpe(gt_traj, est_traj)
 
-    print(f"Mean Translational Error: {np.mean(trans_errors):.4f} m")
-    print(f"Mean Rotational Error: {np.mean(rot_errors):.4f} deg")
+    rmse_trans = np.sqrt(np.mean(np.square(trans_errors)))
+    rmse_rot = np.sqrt(np.mean(np.square(rot_errors)))
 
-    plot_errors(trans_errors, rot_errors, args.plot)
+    print(f"Translational RMSE: {rmse_trans:.4f} m")
+    print(f"Rotational RMSE: {rmse_rot:.4f} deg")
+
+    if args.plot:
+        plot_errors(trans_errors, rot_errors, args.plot)
+    else:
+        plot_errors(trans_errors, rot_errors)
+
+    if args.csv:
+        run_id, dataset, mask = parse_run_metadata(args.estimated_file)
+        write_rpe_metrics_to_csv(args.csv, run_id, dataset, mask, trans_errors, rot_errors)
 
 if __name__ == "__main__":
     main()
