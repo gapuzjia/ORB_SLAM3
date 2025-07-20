@@ -134,7 +134,7 @@ plot the FOV Mask size over time.
                         help='Scaling factor to be applied to the estimated trajectory prior to alignment (default: 1.0)')
     parser.add_argument('--max_difference', type=float, default=0.02,
                         help='Max allowed time difference for matching entries (default: 0.02 seconds)')
-    parser.add_argument('--plot', type=str, default="trajectory_error.png",
+    parser.add_argument('--plot', type=str, default="trajectory_error.svg",
                         help='Output image file to save the trajectory error plot (default: trajectory_error.png)')
     parser.add_argument('--show', action='store_true',
                         help='If set, displays the plot windows instead of saving to file.')
@@ -151,7 +151,7 @@ plot the FOV Mask size over time.
     # Updated: cellManager now expects a file (not a float)
     parser.add_argument('--cellManager', type=str, default=None,
                         help='Cell Manager output file to plot FOV Mask size over time')
-    parser.add_argument('--cellManager_plot', type=str, default="fov_mask_plot.png",
+    parser.add_argument('--cellManager_plot', type=str, default="fov_mask_plot.svg",
                         help='Output image file for the FOV Mask plot (default: fov_mask_plot.png)')
     parser.add_argument('--title', type=str, default='Trajectory Error Over Time',
                         help='Title of the trajectory error plot (default: Trajectory Error Over Time)')
@@ -282,10 +282,10 @@ plot the FOV Mask size over time.
     if args.show:
         plt.show()
     else:
-        fig1.savefig(args.plot, dpi=150)
+        fig1.savefig(args.plot, format='svg', dpi=150)
         print(f"Saved trajectory error plot to {args.plot}")
         if args.cellManager and args.cellManager_plot:
-            fig2.savefig(args.cellManager_plot, dpi=150)
+            fig2.savefig(args.cellManager_plot, format='svg', dpi=150)
             print(f"Saved FOV Mask plot to {args.cellManager_plot}")
 
 

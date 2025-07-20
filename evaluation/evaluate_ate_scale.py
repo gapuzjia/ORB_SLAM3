@@ -44,6 +44,8 @@ trajectory and the estimated trajectory.
 import sys
 import numpy
 import argparse
+import csv
+import os
 
 import associate  # Make sure associate.py is in the same folder or accessible
 
@@ -161,12 +163,16 @@ if __name__ == "__main__":
                         help='plot the first and the aligned second trajectory to an image (format: png)')
     parser.add_argument('--verbose',
                         help='print all evaluation data (otherwise, only the RMSE absolute translational error '
-                             'in meters after alignment will be printed)',
+                         'in meters after alignment will be printed)',
                         action='store_true')
     parser.add_argument('--verbose2',
                         help='print scale error and RMSE absolute translational error in meters '
-                             'after alignment with and without scale correction',
+                         'after alignment with and without scale correction',
                         action='store_true')
+    parser.add_argument('--csv_output',
+                        help='CSV file to write ATE summary',
+                        default=None)
+
     args = parser.parse_args()
 
     first_list = associate.read_file_list(args.first_file, False)
@@ -230,6 +236,23 @@ if __name__ == "__main__":
         print(f"absolute_translational_error.min {numpy.min(trans_error)} m")
         print(f"absolute_translational_error.max {numpy.max(trans_error)} m")
         print(f"max idx: {numpy.argmax(trans_error)}")
+
+    if args.csv_output:
+        rmse_val = numpy.sqrt(numpy.dot(trans_error, trans_error) / len(trans_error))
+        mean_val = numpy.mean(trans_error)
+        max_val = numpy.max(trans_error)
+        std_val = numpy.std(trans_error)
+        median_val = numpy.median(trans_error)
+
+        dataset = os.path.basename(args.first_file).replace(".txt", "")
+        run_id = os.path.basename(args.second_file).replace(".txt", "")
+        file_exists = os.path.isfile(args.csv_output)
+
+        with open(args.csv_output, mode='a', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            if not file_exists:
+                writer.writerow(["run_id", "dataset", "rmse", "mean", "max", "std", "median"])
+            writer.writerow([run_id, dataset, rmse_val, mean_val, max_val, std_val, median_val])
     else:
         # RMSE with scale correction, scale factor, and RMSE without scale correction
         rmse_scale = numpy.sqrt(numpy.dot(trans_error, trans_error) / len(trans_error))

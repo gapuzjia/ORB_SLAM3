@@ -64,14 +64,13 @@ def write_rpe_metrics_to_csv(csv_path, run_id, dataset, mask, trans_errors, rot_
     with open(csv_path, mode='a', newline='') as file:
         writer = csv.writer(file)
         if not file_exists:
-            writer.writerow(["run_id", "dataset", "mask", "trans_rmse", "rot_rmse"])
-        writer.writerow([run_id, dataset, mask, rmse_trans, rmse_rot])
+            writer.writerow(["run_id", "dataset", "trans_rmse", "rot_rmse"])
+        writer.writerow([run_id, dataset, rmse_trans, rmse_rot])
 
 def parse_run_metadata(file_path):
     filename = os.path.basename(file_path)
     parts = filename.replace(".txt", "").split("-")
     dataset = parts[1] if len(parts) > 1 else "unknown"
-    mask = parts[0].replace("kf_dataset", "").replace("f_dataset", "") or "unknown"
     run_id = filename.replace(".txt", "")
     return run_id, dataset, mask
 
@@ -100,7 +99,6 @@ def main():
         plot_errors(trans_errors, rot_errors)
 
     if args.csv:
-        run_id, dataset, mask = parse_run_metadata(args.estimated_file)
         write_rpe_metrics_to_csv(args.csv, run_id, dataset, mask, trans_errors, rot_errors)
 
 if __name__ == "__main__":
